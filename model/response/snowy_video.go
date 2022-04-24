@@ -1,10 +1,10 @@
-package model
+package response
 
 import (
 	"time"
 )
 
-type Videos struct {
+type ShowVideoResponse struct {
 	ID           string    `json:"id" gorm:"column:id"`
 	UserID       uint      `json:"userId" gorm:"column:user_id"`
 	AudioID      string    `json:"audioId" gorm:"column:audio_id"`
@@ -17,4 +17,6 @@ type Videos struct {
 	LikeCounts   uint64    `json:"likeCounts" gorm:"column:like_counts"`
 	Status       int       `json:"status" gorm:"column:status"`
 	CreateTime   time.Time `json:"createTime" gorm:"column:create_time"`
+	Avatar       string    `json:"avatar" gorm:"column:avatar;comment:用户昵称"`     // 用户头像
+	NickName     string    `json:"nickname" gorm:"column:nickname;comment:用户昵称"` // 用户昵称
 }

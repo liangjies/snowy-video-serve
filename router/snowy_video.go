@@ -9,6 +9,6 @@ import (
 func InitVideoRouter(Router *gin.RouterGroup) {
 	UserRouter := Router.Group("video")
 	{
-		UserRouter.POST("uploadAvatar", v1.UploadAvatar) //用户上传头像
+		UserRouter.POST("showVideos", v1.ShowVideos) //分页和搜索查询视频列表
 	}
 }
