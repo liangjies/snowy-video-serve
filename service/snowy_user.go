@@ -6,7 +6,6 @@ import (
 	"path"
 	"snowy-video-serve/global"
 	"snowy-video-serve/model"
-	"snowy-video-serve/model/request"
 	"snowy-video-serve/model/response"
 	"snowy-video-serve/utils/upload"
 	"strings"
@@ -95,10 +94,10 @@ func UpdateUserInfo(user model.UsersInfo) (err error) {
 //@description: 查询用户点赞信息
 //@param: id uint
 //@return: err error, list interface{}, total int64
-func QueryUserLike(id uint, userLike request.UserLike) (err error, userLikeVideo bool) {
+func QueryUserLike(id uint, videoId string) (err error, userLikeVideo bool) {
 	var userLikeVideos model.UsersLikeVideos
 	db := global.SYS_DB.Model(&model.UsersLikeVideos{})
-	err = db.Where("user_id = ? AND video_id=?", id, userLike.VideoID).First(&userLikeVideos).Error
+	err = db.Where("user_id = ? AND video_id=?", id, videoId).First(&userLikeVideos).Error
 	// 记录不存在
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, false
@@ -120,7 +119,7 @@ func Follow(id uint, usersFan model.UsersFans) (err error) {
 	// 开始事务
 	tx := db.Begin()
 	// 关注用户，这里是被动关系
-	if err = tx.Create(model.UsersFans{UserID: usersFan.FanID, FanID: id}).Error; err != nil {
+	if err = tx.Create(&model.UsersFans{UserID: usersFan.FanID, FanID: id}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}

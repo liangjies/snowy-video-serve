@@ -3,7 +3,6 @@ package v1
 import (
 	"snowy-video-serve/global"
 	"snowy-video-serve/model"
-	"snowy-video-serve/model/request"
 	"snowy-video-serve/model/response"
 	"snowy-video-serve/service"
 	"snowy-video-serve/utils"
@@ -174,17 +173,14 @@ func QueryUser(c *gin.Context) {
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
 // @Router /user/queryUserLike [post]
 func QueryUserLike(c *gin.Context) {
-	// 获取JSON数据
-	var userLike request.UserLike
-	_ = c.ShouldBindJSON(&userLike)
+	// 获取Get数据
+	videoId := c.Query("videoId")
 	// 查询点赞信息
-	if err, userLikeVideo := service.QueryUserLike(utils.GetUserID(c), userLike); err != nil {
+	if err, userLikeVideo := service.QueryUserLike(utils.GetUserID(c), videoId); err != nil {
 		global.SYS_LOG.Error("获取失败!", zap.Any("err", err))
 		response.FailWithMessage("获取失败", c)
 	} else {
-		response.OkWithDetailed(response.UserLikeResponse{
-			Data: userLikeVideo,
-		}, "获取成功", c)
+		response.OkWithDetailed(userLikeVideo, "获取成功", c)
 	}
 }
 

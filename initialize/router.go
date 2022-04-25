@@ -25,6 +25,8 @@ func Routers() *gin.Engine {
 	global.SYS_LOG.Info("use middleware cors")
 	Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	global.SYS_LOG.Info("register swagger handler")
+
+	Router.Static("/videosPath", "./assets")
 	// 方便统一添加路由组前缀 多服务器上线使用
 
 	PublicGroup := Router.Group("")
