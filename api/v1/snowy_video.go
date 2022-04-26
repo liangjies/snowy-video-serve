@@ -144,3 +144,109 @@ func ShowUserLike(c *gin.Context) {
 		}, "获取成功", c)
 	}
 }
+
+// @Tags Video
+// @Summary 显示我关注的人发的视频
+// @Produce  application/json
+// @Param file File
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /video/showMyFollowVideos [post]
+func ShowMyFollowVideos(c *gin.Context) {
+	page, err := strconv.Atoi(c.Query("page"))
+	if err != nil || page == 0 {
+		page = 1
+	}
+
+	const PAGE_SIZE int = 6 // 每页分页的记录数
+	if err, list, total := service.ShowMyFollowVideos(utils.GetUserID(c), page, PAGE_SIZE); err != nil {
+		global.SYS_LOG.Error("获取失败!", zap.Any("err", err))
+		response.FailWithMessage("获取失败", c)
+	} else {
+		response.OkWithDetailed(response.PageResult{
+			List:     list,
+			Total:    total,
+			Page:     page,
+			PageSize: PAGE_SIZE,
+		}, "获取成功", c)
+	}
+}
+
+// @Tags Video
+// @Summary 用户留言
+// @Produce application/json
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"关注成功"}"
+// @Router /video/saveComment [post]
+func SaveComment(c *gin.Context) {
+	// 获取GET数据
+	var comments model.Comments
+	_ = c.ShouldBindJSON(&comments)
+	// 校验参数
+	if comments.VideoID == "" || comments.Comment == "" || utils.GetUserID(c) != comments.FromUserID {
+		response.FailWithMessage("参数错误", c)
+		return
+	}
+	// 用户留言
+	if err := service.SaveComment(utils.GetUserID(c), comments); err != nil {
+		global.SYS_LOG.Error("评论失败!", zap.Any("err", err))
+		response.FailWithMessage("评论失败", c)
+	} else {
+		response.Ok(c)
+	}
+}
+
+// @Tags Video
+// @Summary 获取视频用户留言
+// @Produce  application/json
+// @Param file File
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /video/getVideoComments [post]
+func GetVideoComments(c *gin.Context) {
+	videoId := c.Query("videoId")
+	page, err := strconv.Atoi(c.Query("page"))
+	if err != nil || page == 0 {
+		page = 1
+	}
+	// 校验参数
+	if videoId == "" {
+		response.FailWithMessage("参数错误", c)
+		return
+	}
+	const PAGE_SIZE int = 6 // 每页分页的记录数
+	if err, list, total := service.GetVideoComments(utils.GetUserID(c), videoId, page, PAGE_SIZE); err != nil {
+		global.SYS_LOG.Error("获取失败!", zap.Any("err", err))
+		response.FailWithMessage("获取失败", c)
+	} else {
+		response.OkWithDetailed(response.PageResult{
+			List:     list,
+			Total:    total,
+			Page:     page,
+			PageSize: PAGE_SIZE,
+		}, "获取成功", c)
+	}
+}
+
+// @Tags Video
+// @Summary 获取我发布的视频内其他用户的留言
+// @Produce  application/json
+// @Param file File
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /video/getAllComments [post]
+func GetAllComments(c *gin.Context) {
+	page, err := strconv.Atoi(c.Query("page"))
+	if err != nil || page == 0 {
+		page = 1
+	}
+
+	const PAGE_SIZE int = 6 // 每页分页的记录数
+	if err, list, total := service.GetAllComments(utils.GetUserID(c), page, PAGE_SIZE); err != nil {
+		global.SYS_LOG.Error("获取失败!", zap.Any("err", err))
+		response.FailWithMessage("获取失败", c)
+	} else {
+		response.OkWithDetailed(response.PageResult{
+			List:     list,
+			Total:    total,
+			Page:     page,
+			PageSize: PAGE_SIZE,
+		}, "获取成功", c)
+	}
+}

@@ -1,6 +1,7 @@
 package response
 
 import (
+	"snowy-video-serve/model"
 	"time"
 )
 
@@ -19,4 +20,20 @@ type ShowVideoResponse struct {
 	CreateTime   time.Time `json:"createTime" gorm:"column:create_time"`
 	Avatar       string    `json:"avatar" gorm:"column:avatar;comment:用户昵称"`     // 用户头像
 	NickName     string    `json:"nickname" gorm:"column:nickname;comment:用户昵称"` // 用户昵称
+}
+
+type VideoCommentResponse struct {
+	model.Comments
+	Avatar     string `json:"avatar" gorm:"column:avatar;comment:用户昵称"`     // 用户头像
+	NickName   string `json:"nickname" gorm:"column:nickname;comment:用户昵称"` // 用户昵称
+	ToNickName string `json:"toNickname" gorm:"column:to_nickname"`         // 用户昵称
+}
+
+type AllCommentResponse struct {
+	model.Comments
+	Avatar    string `json:"avatar" gorm:"column:avatar;comment:用户昵称"`     // 用户头像
+	NickName  string `json:"nickname" gorm:"column:nickname;comment:用户昵称"` // 用户昵称
+	UserID    uint   `json:"userId" gorm:"column:user_id"`
+	VideoDesc string `json:"videoDesc" gorm:"column:video_desc"`
+	CoverPath string `json:"coverPath" gorm:"column:cover_path"`
 }

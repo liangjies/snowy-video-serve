@@ -5,6 +5,7 @@ import (
 	"snowy-video-serve/model"
 	"snowy-video-serve/model/request"
 	"snowy-video-serve/model/response"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -131,4 +132,90 @@ func ShowUserLike(id uint, page int, PAGE_SIZE int) (err error, list interface{}
 	}
 
 	return err, videoList, total
+}
+
+//@function: ShowMyFollowVideos
+//@description: 显示我关注的人发的视频
+//@param: id uint
+//@return: err error, list interface{}, total int64
+func ShowMyFollowVideos(id uint, page int, PAGE_SIZE int) (err error, list interface{}, total int64) {
+	limit := PAGE_SIZE
+	offset := PAGE_SIZE * (page - 1)
+	db := global.SYS_DB.Model(&model.UsersFans{})
+	var videoList []response.ShowVideoResponse
+	db = db.Where("users_fans.fan_id=?", id)
+	db = db.Select("videos.*, users_info.avatar, users_info.nickname").Joins("left join videos on videos.user_id = users_fans.user_id").Joins("left join users_info on videos.user_id = users_info.id").Where("status = 1")
+
+	err = db.Count(&total).Error
+	if err != nil {
+		return err, videoList, total
+	} else {
+		db = db.Limit(limit).Offset(offset)
+		err = db.Order("create_time desc").Find(&videoList).Error
+	}
+
+	return err, videoList, total
+}
+
+//@function: SaveComment
+//@description: 用户留言
+//@param: id uint
+//@return: err error, list interface{}, total int64
+func SaveComment(id uint, comments model.Comments) (err error) {
+	db := global.SYS_DB.Model(&model.Comments{})
+
+	comments.CreateDate = time.Now()
+	if err = db.Create(&comments).Error; err != nil {
+		return err
+	}
+	return err
+}
+
+//@function: GetVideoComments
+//@description: 获取视频用户留言
+//@param: id uint
+//@return: err error, list interface{}, total int64
+func GetVideoComments(id uint, videoId string, page int, PAGE_SIZE int) (err error, list interface{}, total int64) {
+	limit := PAGE_SIZE
+	offset := PAGE_SIZE * (page - 1)
+	db := global.SYS_DB.Model(&model.Comments{})
+	var videoCommentList []response.VideoCommentResponse
+	db = db.Where("comments.video_id=?", videoId)
+	db = db.Select("comments.*, users_info.avatar, users_info.nickname,tu.nickname as to_nickname").Joins("left join users_info tu on comments.to_user_id = tu.id").Joins("left join users_info on comments.from_user_id = users_info.id")
+
+	err = db.Count(&total).Error
+	if err != nil {
+		return err, videoCommentList, total
+	} else {
+		db = db.Limit(limit).Offset(offset)
+		err = db.Order("create_date asc").Find(&videoCommentList).Error
+	}
+
+	return err, videoCommentList, total
+}
+
+//@function: GetAllComments
+//@description: 获取我发布的视频内其他用户的留言
+//@param: id uint
+//@return: err error, list interface{}, total int64
+func GetAllComments(id uint, page int, PAGE_SIZE int) (err error, list interface{}, total int64) {
+	limit := PAGE_SIZE
+	offset := PAGE_SIZE * (page - 1)
+	db := global.SYS_DB.Model(&model.Comments{})
+	var allCommentList []response.AllCommentResponse
+
+	db = db.Select("comments.*, users_info.avatar, users_info.nickname,videos.user_id,videos.video_desc,videos.cover_path")
+	db = db.Joins("left join videos on comments.video_id = videos.id").Joins("left join users_info on comments.from_user_id = users_info.id")
+	db = db.Where("comments.from_user_id != ?", id)
+	db = db.Where("videos.user_id = ?", id)
+
+	err = db.Count(&total).Error
+	if err != nil {
+		return err, allCommentList, total
+	} else {
+		db = db.Limit(limit).Offset(offset)
+		err = db.Order("create_date desc").Find(&allCommentList).Error
+	}
+
+	return err, allCommentList, total
 }
