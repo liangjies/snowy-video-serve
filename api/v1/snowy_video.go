@@ -70,7 +70,20 @@ func ShowAllVideos(c *gin.Context) {
 	}
 }
 
-// TODO 获取热搜词
+// @Tags Video
+// @Summary 获取热搜词
+// @Produce  application/json
+// @Param file File
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /video/hot [post]
+func Hot(c *gin.Context) {
+	if err, list := service.Hot(); err != nil {
+		global.SYS_LOG.Error("获取失败!", zap.Any("err", err))
+		response.FailWithMessage("获取失败", c)
+	} else {
+		response.OkWithDetailed(list, "获取成功", c)
+	}
+}
 
 // @Tags Video
 // @Summary 用户点赞
@@ -230,7 +243,7 @@ func GetVideoComments(c *gin.Context) {
 // @Produce  application/json
 // @Param file File
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
-// @Router /video/getAllComments [post]
+// @Router /video/GetAllComments [post]
 func GetAllComments(c *gin.Context) {
 	page, err := strconv.Atoi(c.Query("page"))
 	if err != nil || page == 0 {

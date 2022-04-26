@@ -232,11 +232,14 @@ func QueryFollows(c *gin.Context) {
 		return
 	}
 
-	if err, queryFollows := service.QueryFollows(uint(id)); err != nil {
+	if err, list, total := service.QueryFollows(uint(id)); err != nil {
 		global.SYS_LOG.Error("获取失败!", zap.Any("err", err))
 		response.FailWithMessage("获取失败", c)
 	} else {
-		response.OkWithDetailed(queryFollows, "获取成功", c)
+		response.OkWithDetailed(response.PageResult{
+			List:  list,
+			Total: total,
+		}, "获取成功", c)
 	}
 }
 

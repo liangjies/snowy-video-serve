@@ -169,10 +169,18 @@ func UnFollow(id uint, usersFan model.UsersFans) (err error) {
 //@description: 获取关注用户信息
 //@param: id uint
 //@return: err error, list interface{}, total int64
-func QueryFollows(id uint) (err error, queryFollows []response.QueryFollowsResponse) {
+func QueryFollows(id uint) (err error, list interface{}, total int64) {
+	var queryFollows []response.QueryFollowsResponse
 	db := global.SYS_DB.Model(&model.UsersFans{})
-	err = db.Joins("left join users_info on user_id = users_info.id").Where("fan_id = ?", id).Scan(&queryFollows).Error
-	return err, queryFollows
+	db = db.Joins("left join users_info on user_id = users_info.id").Where("fan_id = ?", id)
+	err = db.Count(&total).Error
+	if err != nil {
+		return err, queryFollows, total
+	} else {
+		err = db.Scan(&queryFollows).Error
+	}
+
+	return err, queryFollows, total
 }
 
 //@function: QueryFans

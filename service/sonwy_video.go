@@ -23,8 +23,11 @@ func QueryAllVideos(id uint, videos model.Videos, page int, PAGE_SIZE int) (err 
 	db = db.Select("videos.*, users_info.avatar, users_info.nickname").Joins("left join users_info on user_id = users_info.id").Where("status = 1")
 	// 搜索
 	if videos.VideoDesc != "" {
-		db = db.Where("method LIKE ?", "%"+videos.VideoDesc+"%")
-		// TODO 保存热搜词
+		db = db.Where("video_desc LIKE ?", "%"+videos.VideoDesc+"%")
+		// 保存热搜词
+		if err = global.SYS_DB.Model(&model.SearchRecords{}).Create(&model.SearchRecords{Content: videos.VideoDesc}).Error; err != nil {
+			return
+		}
 	}
 	// 搜索
 	if videos.UserID != 0 {
@@ -40,6 +43,18 @@ func QueryAllVideos(id uint, videos model.Videos, page int, PAGE_SIZE int) (err 
 	}
 
 	return err, videoList, total
+}
+
+//@function: Hot
+//@description: 获取热搜词
+//@param: id uint
+//@return: err error, list interface{}, total int64
+func Hot() (err error, list interface{}) {
+	limit := 5
+	db := global.SYS_DB.Model(&model.SearchRecords{})
+	var HotWordList []string
+	err = db.Select("content").Group("content").Order("count(content) desc").Limit(limit).Find(&HotWordList).Error
+	return err, HotWordList
 }
 
 //@function: UserLike
