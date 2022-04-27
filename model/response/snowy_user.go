@@ -5,7 +5,8 @@ import (
 )
 
 type UsersInfoResponse struct {
-	User model.UsersInfo `json:"user"`
+	model.UsersInfo
+	IsFollow bool `json:"follow" gorm:"column:is_follow`
 }
 
 type LoginResponse struct {

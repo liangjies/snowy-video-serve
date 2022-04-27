@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"mime/multipart"
 	"path"
 	"snowy-video-serve/global"
@@ -74,10 +75,23 @@ func UploadUserImage(header *multipart.FileHeader, userId uint, imgType string) 
 //@description: 查询用户信息
 //@param: id uint
 //@return: err error, user model.UsersInfo
-func QueryUser(id uint) (err error, user model.UsersInfo) {
+func QueryUser(id uint, userId string) (err error, user model.UsersInfo, isFollow bool) {
+	var usersFans model.UsersFans
 	db := global.SYS_DB.Model(&model.UsersInfo{})
-	err = db.Where("id = ?", id).Find(&user).Error
-	return err, user
+	// 查询用户信息
+	if err = db.Where("id = ?", userId).Find(&user).Error; err != nil {
+		return err, user, isFollow
+	}
+
+	// 查询是否关注
+	err = global.SYS_DB.Model(&model.UsersFans{}).Where("user_id = ? AND fan_id = ?", userId, id).First(&usersFans).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		err = nil
+		isFollow = false
+	} else {
+		isFollow = true
+	}
+	return err, user, isFollow
 }
 
 //@function: UpdateUserInfo
@@ -113,13 +127,15 @@ func Follow(id uint, usersFan model.UsersFans) (err error) {
 	var usersFans model.UsersFans
 	db := global.SYS_DB.Model(&model.UsersFans{})
 	// 首先查询有没有关注过
-	if err = db.Where("user_id = ? AND fan_id=?", usersFan.FanID, id).First(&usersFans).Error; err == nil {
+	err = global.SYS_DB.Model(&model.UsersFans{}).Where("user_id = ? AND fan_id=?", usersFan.UserID, id).First(&usersFans).Error
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil
 	}
+	err = nil
 	// 开始事务
 	tx := db.Begin()
 	// 关注用户，这里是被动关系
-	if err = tx.Create(&model.UsersFans{UserID: usersFan.FanID, FanID: id}).Error; err != nil {
+	if err = tx.Create(&model.UsersFans{UserID: usersFan.UserID, FanID: id}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -129,7 +145,7 @@ func Follow(id uint, usersFan model.UsersFans) (err error) {
 		return err
 	}
 	// 被关注用户增加粉丝数
-	if err = tx.Model(&model.UsersInfo{}).Where("id = ?", usersFan.FanID).Update("fans_counts", gorm.Expr("fans_counts + 1")).Error; err != nil {
+	if err = tx.Model(&model.UsersInfo{}).Where("id = ?", usersFan.UserID).Update("fans_counts", gorm.Expr("fans_counts + 1")).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -147,7 +163,7 @@ func UnFollow(id uint, usersFan model.UsersFans) (err error) {
 	// 开始事务
 	tx := db.Begin()
 	// 取消关注，这里是被动关系
-	if err = db.Where("user_id = ? AND fan_id=?", usersFan.FanID, id).Delete(&usersFans).Error; err != nil {
+	if err = db.Where("user_id = ? AND fan_id=?", usersFan.UserID, id).Delete(&usersFans).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -157,7 +173,7 @@ func UnFollow(id uint, usersFan model.UsersFans) (err error) {
 		return err
 	}
 	// 被关注用户减少粉丝数
-	if err = tx.Model(&model.UsersInfo{}).Where("id = ?", usersFan.FanID).Update("fans_counts", gorm.Expr("fans_counts - 1")).Error; err != nil {
+	if err = tx.Model(&model.UsersInfo{}).Where("id = ?", usersFan.UserID).Update("fans_counts", gorm.Expr("fans_counts - 1")).Error; err != nil {
 		tx.Rollback()
 		return err
 	}

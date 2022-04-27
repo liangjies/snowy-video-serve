@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"fmt"
 	"snowy-video-serve/global"
 	"snowy-video-serve/model"
 	"snowy-video-serve/model/response"
@@ -157,12 +158,16 @@ func UpdateGender(c *gin.Context) {
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
 // @Router /user/query [post]
 func QueryUser(c *gin.Context) {
-	if err, user := service.QueryUser(utils.GetUserID(c)); err != nil {
+	userId := c.Query("userId")
+	fmt.Println("userId", userId)
+	fmt.Println("fanId", c.Query("fanId"))
+	if err, user, isFollow := service.QueryUser(utils.GetUserID(c), userId); err != nil {
 		global.SYS_LOG.Error("获取失败!", zap.Any("err", err))
 		response.FailWithMessage("获取失败", c)
 	} else {
 		response.OkWithDetailed(response.UsersInfoResponse{
-			User: user,
+			UsersInfo: user,
+			IsFollow:  isFollow,
 		}, "获取成功", c)
 	}
 }
@@ -192,7 +197,8 @@ func QueryUserLike(c *gin.Context) {
 func Follow(c *gin.Context) {
 	// 获取JSON数据
 	var usersFan model.UsersFans
-	_ = c.ShouldBindJSON(&usersFan)
+	_ = c.ShouldBindQuery(&usersFan)
+
 	// 关注用户
 	if err := service.Follow(utils.GetUserID(c), usersFan); err != nil {
 		global.SYS_LOG.Error("关注失败!", zap.Any("err", err))
@@ -210,7 +216,7 @@ func Follow(c *gin.Context) {
 func UnFollow(c *gin.Context) {
 	// 获取JSON数据
 	var usersFan model.UsersFans
-	_ = c.ShouldBindJSON(&usersFan)
+	_ = c.ShouldBindQuery(&usersFan)
 	// 取消关注用户
 	if err := service.UnFollow(utils.GetUserID(c), usersFan); err != nil {
 		global.SYS_LOG.Error("取消关注失败!", zap.Any("err", err))
