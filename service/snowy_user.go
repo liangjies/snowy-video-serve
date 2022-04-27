@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"mime/multipart"
 	"path"
 	"snowy-video-serve/global"
@@ -188,7 +187,7 @@ func UnFollow(id uint, usersFan model.UsersFans) (err error) {
 func QueryFollows(id uint) (err error, list interface{}, total int64) {
 	var queryFollows []response.QueryFollowsResponse
 	db := global.SYS_DB.Model(&model.UsersFans{})
-	db = db.Joins("left join users_info on user_id = users_info.id").Where("fan_id = ?", id)
+	db = db.Select("users_fans.user_id as id,avatar,nickname,signature").Joins("left join users_info on user_id = users_info.id").Where("fan_id = ?", id)
 	err = db.Count(&total).Error
 	if err != nil {
 		return err, queryFollows, total
@@ -205,7 +204,7 @@ func QueryFollows(id uint) (err error, list interface{}, total int64) {
 //@return: err error, list interface{}, total int64
 func QueryFans(id uint) (err error, queryFans []response.QueryFansResponse) {
 	db := global.SYS_DB.Model(&model.UsersFans{})
-	err = db.Joins("left join users_info on fan_id = users_info.id").Where("user_id = ?", id).Scan(&queryFans).Error
+	err = db.Select("users_fans.fan_id as id,avatar,nickname,signature").Joins("left join users_info on fan_id = users_info.id").Where("user_id = ?", id).Scan(&queryFans).Error
 	return err, queryFans
 }
 

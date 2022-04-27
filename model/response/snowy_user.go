@@ -20,15 +20,15 @@ type UserLikeResponse struct {
 }
 
 type QueryFollowsResponse struct {
-	ID        uint `json:"id" gorm:"column:user_id`
-	Avatar    uint `json:"avatar" gorm:"column:avatar`
-	Nickname  uint `json:"nickname" gorm:"column:nickname`
-	Signature uint `json:"signature" gorm:"column:signature`
+	ID        uint   `json:"id" gorm:"column:id`
+	Avatar    string `json:"avatar" gorm:"column:avatar`
+	Nickname  string `json:"nickname" gorm:"column:nickname`
+	Signature string `json:"signature" gorm:"column:signature`
 }
 
 type QueryFansResponse struct {
-	ID        uint `json:"id" gorm:"column:fan_id`
-	Avatar    uint `json:"avatar" gorm:"column:avatar`
-	Nickname  uint `json:"nickname" gorm:"column:nickname`
-	Signature uint `json:"signature" gorm:"column:signature`
+	ID        uint   `json:"id" gorm:"column:id`
+	Avatar    string `json:"avatar" gorm:"column:avatar`
+	Nickname  string `json:"nickname" gorm:"column:nickname`
+	Signature string `json:"signature" gorm:"column:signature`
 }
