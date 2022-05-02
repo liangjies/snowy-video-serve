@@ -19,6 +19,6 @@ func InitVideoRouter(Router *gin.RouterGroup) {
 		UserRouter.POST("saveComment", v1.SaveComment)               //用户留言
 		UserRouter.POST("getVideoComments", v1.GetVideoComments)     //获取视频用户留言
 		UserRouter.POST("getAllComments", v1.GetAllComments)         //获取我发布的视频内其他用户的留言
-
+		UserRouter.POST("saveHistory", v1.SaveHistory)               //保存播放记录
 	}
 }

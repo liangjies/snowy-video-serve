@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"snowy-video-serve/global"
 	"snowy-video-serve/model"
 	"snowy-video-serve/model/request"
@@ -20,7 +21,9 @@ func QueryAllVideos(id uint, videos model.Videos, page int, PAGE_SIZE int) (err 
 	db := global.SYS_DB.Model(&model.Videos{})
 	var videoList []response.ShowVideoResponse
 
-	db = db.Select("videos.*, users_info.avatar, users_info.nickname").Joins("left join users_info on user_id = users_info.id").Where("status = 1")
+	db = db.Select("videos.*, users_info.avatar, users_info.nickname,true as isplay, false as playIng,'pause' as state")
+	db = db.Joins("left join users_info on user_id = users_info.id").Joins("left join videos_history on videos_history.video_id = videos.id and videos_history.user_id= ? ", id)
+	db = db.Where("status = 1 AND nums is null")
 	// 搜索
 	if videos.VideoDesc != "" {
 		db = db.Where("video_desc LIKE ?", "%"+videos.VideoDesc+"%")
@@ -190,7 +193,7 @@ func SaveComment(id uint, comments model.Comments) (err error) {
 //@description: 获取视频用户留言
 //@param: id uint
 //@return: err error, list interface{}, total int64
-func GetVideoComments(id uint, videoId string, page int, PAGE_SIZE int) (err error, list interface{}, total int64) {
+func GetVideoComments(id uint, videoId uint64, page int, PAGE_SIZE int) (err error, list interface{}, total int64) {
 	limit := PAGE_SIZE
 	offset := PAGE_SIZE * (page - 1)
 	db := global.SYS_DB.Model(&model.Comments{})
@@ -233,4 +236,25 @@ func GetAllComments(id uint, page int, PAGE_SIZE int) (err error, list interface
 	}
 
 	return err, allCommentList, total
+}
+
+//@function: SaveHistory
+//@description: 保存播放记录
+//@param: id uint
+//@return: err error, list interface{}, total int64
+func SaveHistory(id uint, videoID uint64) (err error) {
+	db := global.SYS_DB.Model(&model.VideosHistory{})
+	// 查询是否播放过记录
+	var recodeID uint
+	err = global.SYS_DB.Model(&model.VideosHistory{}).Select("id").Where("user_id = ? AND video_id = ?", id, videoID).First(&recodeID).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		err = nil
+		if err = db.Select("user_id", "video_id").Create(&model.VideosHistory{UserID: id, VideoID: videoID}).Error; err != nil {
+			return err
+		}
+	} else {
+		err = db.Where("id = ?", recodeID).Update("nums", gorm.Expr("nums + 1")).Error
+	}
+
+	return err
 }

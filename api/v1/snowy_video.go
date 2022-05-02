@@ -57,7 +57,7 @@ func ShowAllVideos(c *gin.Context) {
 	var videos model.Videos
 
 	const PAGE_SIZE int = 6 // 每页分页的记录数
-	if err, list, total := service.QueryAllVideos(0, videos, page, PAGE_SIZE); err != nil {
+	if err, list, total := service.QueryAllVideos(utils.GetUserID(c), videos, page, PAGE_SIZE); err != nil {
 		global.SYS_LOG.Error("获取失败!", zap.Any("err", err))
 		response.FailWithMessage("获取失败", c)
 	} else {
@@ -96,7 +96,7 @@ func UserLike(c *gin.Context) {
 	_ = c.ShouldBindQuery(&userLike)
 	fmt.Println(userLike)
 	// 校验参数
-	if userLike.VideoID == "" || userLike.UserID == 0 {
+	if userLike.VideoID == 0 || userLike.UserID == 0 {
 		response.FailWithMessage("参数错误", c)
 		return
 	}
@@ -119,7 +119,7 @@ func UserUnlike(c *gin.Context) {
 	var userLike request.UserLike
 	_ = c.ShouldBindQuery(&userLike)
 	// 校验参数
-	if userLike.VideoID == "" || userLike.UserID == 0 {
+	if userLike.VideoID == 0 || userLike.UserID == 0 {
 		response.FailWithMessage("参数错误", c)
 		return
 	}
@@ -194,7 +194,7 @@ func SaveComment(c *gin.Context) {
 	var comments model.Comments
 	_ = c.ShouldBindJSON(&comments)
 	// 校验参数
-	if comments.VideoID == "" || comments.Comment == "" || utils.GetUserID(c) != comments.FromUserID {
+	if comments.VideoID == 0 || comments.Comment == "" || utils.GetUserID(c) != comments.FromUserID {
 		response.FailWithMessage("参数错误", c)
 		return
 	}
@@ -214,13 +214,17 @@ func SaveComment(c *gin.Context) {
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
 // @Router /video/getVideoComments [post]
 func GetVideoComments(c *gin.Context) {
-	videoId := c.Query("videoId")
+	videoId, err := strconv.ParseUint(c.Query("videoId"), 10, 64)
+	if err != nil {
+		response.FailWithMessage("参数错误", c)
+		return
+	}
 	page, err := strconv.Atoi(c.Query("page"))
 	if err != nil || page == 0 {
 		page = 1
 	}
 	// 校验参数
-	if videoId == "" {
+	if videoId == 0 {
 		response.FailWithMessage("参数错误", c)
 		return
 	}
@@ -261,5 +265,30 @@ func GetAllComments(c *gin.Context) {
 			Page:     page,
 			PageSize: PAGE_SIZE,
 		}, "获取成功", c)
+	}
+}
+
+// @Tags Video
+// @Summary 保存播放记录
+// @Produce application/json
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"关注成功"}"
+// @Router /video/saveHistory [post]
+func SaveHistory(c *gin.Context) {
+	// 获取GET数据
+	var saveHistory request.SaveHistory
+	_ = c.ShouldBindJSON(&saveHistory)
+	fmt.Println("videosHistory", saveHistory)
+	videoID, err := strconv.ParseUint(saveHistory.VideoID, 10, 64)
+	// 校验参数
+	if err != nil || videoID == 0 {
+		response.FailWithMessage("参数错误", c)
+		return
+	}
+	// 用户留言
+	if err := service.SaveHistory(utils.GetUserID(c), videoID); err != nil {
+		global.SYS_LOG.Error("保存失败!", zap.Any("err", err))
+		response.FailWithMessage("保存失败", c)
+	} else {
+		response.Ok(c)
 	}
 }

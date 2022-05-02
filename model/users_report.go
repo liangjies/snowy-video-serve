@@ -6,7 +6,7 @@ import (
 
 type UsersReport struct {
 	ID          uint      `json:"id" gorm:"column:id"`
-	DealVideoID string    `json:"dealVideoId" gorm:"column:deal_video_id"`
+	DealVideoID uint64    `json:"dealVideoId" gorm:"column:deal_video_id"`
 	DealUserID  uint      `json:"dealUserId" gorm:"column:deal_user_id"`
 	Title       string    `json:"title" gorm:"column:title"`
 	Content     string    `json:"content"  gorm:"column:content"`

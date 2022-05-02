@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"fmt"
 	"snowy-video-serve/global"
 	"snowy-video-serve/model"
 	"snowy-video-serve/model/response"
@@ -159,8 +158,6 @@ func UpdateGender(c *gin.Context) {
 // @Router /user/query [post]
 func QueryUser(c *gin.Context) {
 	userId := c.Query("userId")
-	fmt.Println("userId", userId)
-	fmt.Println("fanId", c.Query("fanId"))
 	if err, user, isFollow := service.QueryUser(utils.GetUserID(c), userId); err != nil {
 		global.SYS_LOG.Error("获取失败!", zap.Any("err", err))
 		response.FailWithMessage("获取失败", c)
@@ -179,7 +176,12 @@ func QueryUser(c *gin.Context) {
 // @Router /user/queryUserLike [post]
 func QueryUserLike(c *gin.Context) {
 	// 获取Get数据
-	videoId := c.Query("videoId")
+	videoId, err := strconv.ParseUint(c.Query("videoId"), 10, 64)
+	if err != nil {
+		response.FailWithMessage("参数错误", c)
+		return
+	}
+
 	// 查询点赞信息
 	if err, userLikeVideo := service.QueryUserLike(utils.GetUserID(c), videoId); err != nil {
 		global.SYS_LOG.Error("获取失败!", zap.Any("err", err))

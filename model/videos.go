@@ -5,7 +5,7 @@ import (
 )
 
 type Videos struct {
-	ID           string    `json:"id" gorm:"column:id"`
+	ID           uint64    `json:"id" gorm:"column:id"`
 	UserID       uint      `json:"userId" gorm:"column:user_id"`
 	AudioID      string    `json:"audioId" gorm:"column:audio_id"`
 	VideoDesc    string    `json:"videoDesc" gorm:"column:video_desc"`
@@ -17,4 +17,5 @@ type Videos struct {
 	LikeCounts   uint64    `json:"likeCounts" gorm:"column:like_counts"`
 	Status       int       `json:"status" gorm:"column:status"`
 	CreateTime   time.Time `json:"createTime" gorm:"column:create_time"`
+	IsLocal      bool      `json:"isLocal" gorm:"column:is_local"`
 }

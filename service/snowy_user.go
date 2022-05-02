@@ -77,8 +77,13 @@ func UploadUserImage(header *multipart.FileHeader, userId uint, imgType string) 
 func QueryUser(id uint, userId string) (err error, user model.UsersInfo, isFollow bool) {
 	var usersFans model.UsersFans
 	db := global.SYS_DB.Model(&model.UsersInfo{})
+	if userId == "" {
+		db = db.Where("id = ?", id)
+	} else {
+		db = db.Where("id = ?", userId)
+	}
 	// 查询用户信息
-	if err = db.Where("id = ?", userId).Find(&user).Error; err != nil {
+	if err = db.Find(&user).Error; err != nil {
 		return err, user, isFollow
 	}
 
@@ -107,7 +112,7 @@ func UpdateUserInfo(user model.UsersInfo) (err error) {
 //@description: 查询用户点赞信息
 //@param: id uint
 //@return: err error, list interface{}, total int64
-func QueryUserLike(id uint, videoId string) (err error, userLikeVideo bool) {
+func QueryUserLike(id uint, videoId uint64) (err error, userLikeVideo bool) {
 	var userLikeVideos model.UsersLikeVideos
 	db := global.SYS_DB.Model(&model.UsersLikeVideos{})
 	err = db.Where("user_id = ? AND video_id=?", id, videoId).First(&userLikeVideos).Error

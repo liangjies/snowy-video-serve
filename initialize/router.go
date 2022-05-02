@@ -26,7 +26,7 @@ func Routers() *gin.Engine {
 	Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	global.SYS_LOG.Info("register swagger handler")
 
-	Router.Static("/videosPath", "./assets")
+	Router.Static("/videosPath", "G:\\MyDrivers\\hotfix\\国\\新建文件夹\\")
 	// 方便统一添加路由组前缀 多服务器上线使用
 
 	PublicGroup := Router.Group("")
