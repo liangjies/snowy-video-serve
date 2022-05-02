@@ -3,6 +3,7 @@ module snowy-video-serve
 go 1.16
 
 require (
+	github.com/bitly/go-simplejson v0.5.0
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/casbin/casbin/v2 v2.44.2
 	github.com/casbin/gorm-adapter/v3 v3.6.0

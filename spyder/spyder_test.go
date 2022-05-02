@@ -5,5 +5,6 @@ import (
 )
 
 func TestSpyder(t *testing.T) {
-	RunSpyder()
+	// RunSpyder()
+	Pipixia()
 }

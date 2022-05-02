@@ -56,7 +56,7 @@ func ShowAllVideos(c *gin.Context) {
 	}
 	var videos model.Videos
 
-	const PAGE_SIZE int = 6 // 每页分页的记录数
+	const PAGE_SIZE int = 3 // 每页分页的记录数
 	if err, list, total := service.QueryAllVideos(utils.GetUserID(c), videos, page, PAGE_SIZE); err != nil {
 		global.SYS_LOG.Error("获取失败!", zap.Any("err", err))
 		response.FailWithMessage("获取失败", c)

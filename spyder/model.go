@@ -16,9 +16,7 @@ type Cursor struct {
 type DownloadList struct {
 	URL string `json:"url"`
 }
-type URLList struct {
-	URL string `json:"url"`
-}
+
 type Icon struct {
 	IsGif        bool           `json:"is_gif"`
 	DownloadList []DownloadList `json:"download_list"`
@@ -185,9 +183,7 @@ type Video struct {
 	Animate             interface{}     `json:"animate"`
 	TailAdPassthrough   string          `json:"tail_ad_passthrough"`
 }
-type URLList struct {
-	URL string `json:"url"`
-}
+
 type Cover struct {
 	IsGif        bool           `json:"is_gif"`
 	DownloadList []DownloadList `json:"download_list"`
@@ -367,10 +363,7 @@ type Stats struct {
 	ShareCount      int           `json:"share_count"`
 	PlayCount       int           `json:"play_count"`
 }
-type URLList struct {
-	URL     string `json:"url"`
-	Expires int    `json:"expires"`
-}
+
 type OriginVideoDownload struct {
 	AnimatedCoverImage interface{} `json:"animated_cover_image"`
 	URI                string      `json:"uri"`
@@ -386,9 +379,7 @@ type OriginVideoDownload struct {
 	P2PType            interface{} `json:"p2p_type"`
 	FileHash           interface{} `json:"file_hash"`
 }
-type URLList struct {
-	URL string `json:"url"`
-}
+
 type AhaImage struct {
 	IsGif        bool           `json:"is_gif"`
 	DownloadList []DownloadList `json:"download_list"`
@@ -518,17 +509,4 @@ type Data struct {
 	SaasLiveInfo     interface{}      `json:"saas_live_info"`
 	Comment          interface{}      `json:"comment"`
 	BoardInfo        BoardInfo        `json:"board_info"`
-}
-type Data struct {
-	Cursor                Cursor      `json:"cursor"`
-	HashtagInfo           interface{} `json:"hashtag_info"`
-	Data                  []Data      `json:"data"`
-	PlayDeferTime         int         `json:"play_defer_time"`
-	ClientSettings        interface{} `json:"client_settings"`
-	CityInfo              interface{} `json:"city_info"`
-	ChannelHeader         interface{} `json:"channel_header"`
-	Tips                  string      `json:"tips"`
-	StoryInfo             interface{} `json:"story_info"`
-	PlaySound             bool        `json:"play_sound"`
-	VideoAspectRatioStyle int         `json:"video_aspect_ratio_style"`
 }
