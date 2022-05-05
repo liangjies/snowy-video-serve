@@ -17,5 +17,6 @@ type Videos struct {
 	LikeCounts   uint64    `json:"likeCounts" gorm:"column:like_counts"`
 	Status       int       `json:"status" gorm:"column:status"`
 	CreateTime   time.Time `json:"createTime" gorm:"column:create_time"`
+	Hash         string    `json:"hash" gorm:"column:hash"`
 	IsLocal      bool      `json:"isLocal" gorm:"column:is_local"`
 }

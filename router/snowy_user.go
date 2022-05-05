@@ -20,7 +20,7 @@ func InitUserRouter(Router *gin.RouterGroup) {
 		UserRouter.POST("queryFollows", v1.QueryFollows)                   //获取关注用户信息
 		UserRouter.POST("queryFans", v1.QueryFans)                         //获取粉丝信息
 		UserRouter.POST("reportUser", v1.ReportUser)                       //举报用户
-
-		UserRouter.POST("query", v1.QueryUser) //查询用户信息
+		UserRouter.POST("refreshToken", v1.RefreshToken)                   //更新token
+		UserRouter.POST("query", v1.QueryUser)                             //查询用户信息
 	}
 }

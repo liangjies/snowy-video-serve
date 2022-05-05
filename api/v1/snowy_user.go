@@ -1,14 +1,21 @@
 package v1
 
 import (
+	"fmt"
+	"time"
+
 	"snowy-video-serve/global"
+	"snowy-video-serve/middleware"
 	"snowy-video-serve/model"
+	"snowy-video-serve/model/request"
 	"snowy-video-serve/model/response"
 	"snowy-video-serve/service"
 	"snowy-video-serve/utils"
 	"strconv"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis"
 	"go.uber.org/zap"
 )
 
@@ -287,4 +294,66 @@ func ReportUser(c *gin.Context) {
 	} else {
 		response.Ok(c)
 	}
+}
+
+// @Tags User
+// @Summary 更新token
+// @Produce  application/json
+// @Param data body request.Login true "用户名, 密码, 验证码"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"登陆成功"}"
+// @Router /user/refreshToken [post]
+func RefreshToken(c *gin.Context) {
+	err, user, _ := service.QueryUser(utils.GetUserID(c), "")
+	if err != nil {
+		response.FailWithMessage("用户信息错误", c)
+		return
+	}
+	type TokenJSON struct {
+		Token string `json:"token"`
+	}
+	var tokenJSON TokenJSON
+	_ = c.ShouldBindJSON(&tokenJSON)
+
+	fmt.Println(user.UUID.String())
+	if err, jwtStr := service.GetRedisJWT(user.UUID.String()); err == redis.Nil {
+		response.FailWithMessage("令牌不存在", c)
+		return
+	} else {
+		if tokenJSON.Token != jwtStr {
+			response.FailWithMessage("令牌错误", c)
+			return
+		}
+	}
+
+	j := &middleware.JWT{SigningKey: []byte(global.SYS_CONFIG.JWT.SigningKey)} // 唯一签名
+	claims := request.CustomClaims{
+		UUID:       user.UUID,
+		ID:         user.ID,
+		Username:   user.Username,
+		BufferTime: global.SYS_CONFIG.JWT.BufferTime, // 缓冲时间1天 缓冲时间内会获得新的token刷新令牌 此时一个用户会存在两个有效令牌 但是前端只留一个 另一个会丢失
+		StandardClaims: jwt.StandardClaims{
+			NotBefore: time.Now().Unix() - 1000,                              // 签名生效时间
+			ExpiresAt: time.Now().Unix() + global.SYS_CONFIG.JWT.ExpiresTime, // 过期时间 7天  配置文件
+			Issuer:    "qmtPlus",                                             // 签名的发行者
+		},
+	}
+	token, err := j.CreateToken(claims)
+	if err != nil {
+		global.SYS_LOG.Error("获取token失败!", zap.Any("err", err))
+		response.FailWithMessage("获取token失败", c)
+		return
+	}
+
+	if err := service.SetRedisJWT(token, user.UUID.String()); err != nil {
+		global.SYS_LOG.Error("设置登录状态失败!", zap.Any("err", err))
+		response.FailWithMessage("设置登录状态失败", c)
+		return
+	}
+
+	response.OkWithDetailed(response.LoginResponse{
+		User:      user,
+		Token:     token,
+		ExpiresAt: claims.StandardClaims.ExpiresAt * 1000,
+	}, "登录成功", c)
+
 }
