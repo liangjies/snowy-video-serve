@@ -11,13 +11,13 @@ import (
 	"gorm.io/gorm"
 )
 
-//@function: ShowVideos
+//@function: QueryAllVideos
 //@description: 分页和搜索查询视频列表
 //@param: id uint
 //@return: err error, list interface{}, total int64
-func QueryAllVideos(id uint, videos model.Videos, page int, PAGE_SIZE int) (err error, list interface{}, total int64) {
-	limit := PAGE_SIZE
-	offset := PAGE_SIZE * (page - 1)
+func QueryAllVideos(id uint, queryVideos request.QueryVideos) (err error, list interface{}, total int64) {
+	limit := queryVideos.PageSize
+	offset := queryVideos.PageSize * (queryVideos.Page - 1)
 	db := global.SYS_DB.Model(&model.Videos{})
 	var videoList []response.ShowVideoResponse
 
@@ -25,16 +25,20 @@ func QueryAllVideos(id uint, videos model.Videos, page int, PAGE_SIZE int) (err 
 	db = db.Joins("left join users_info on user_id = users_info.id").Joins("left join videos_history on videos_history.video_id = videos.id and videos_history.user_id= ? ", id)
 	db = db.Where("status = 1 AND nums is null")
 	// 搜索
-	if videos.VideoDesc != "" {
-		db = db.Where("video_desc LIKE ?", "%"+videos.VideoDesc+"%")
+	if queryVideos.VideoDesc != "" {
+		db = db.Where("video_desc LIKE ?", "%"+queryVideos.VideoDesc+"%")
 		// 保存热搜词
-		if err = global.SYS_DB.Model(&model.SearchRecords{}).Create(&model.SearchRecords{Content: videos.VideoDesc}).Error; err != nil {
+		if err = global.SYS_DB.Model(&model.SearchRecords{}).Create(&model.SearchRecords{Content: queryVideos.VideoDesc}).Error; err != nil {
 			return
 		}
 	}
 	// 搜索
-	if videos.UserID != 0 {
-		db = db.Where("user_id = ?", videos.UserID)
+	if queryVideos.UserID != 0 {
+		db = db.Where("user_id = ?", queryVideos.UserID)
+	}
+	// 搜索
+	if queryVideos.VideoID != "" {
+		db = db.Where("videos.id = ?", queryVideos.VideoID)
 	}
 
 	err = db.Count(&total).Error

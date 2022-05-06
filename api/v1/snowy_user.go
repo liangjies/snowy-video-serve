@@ -354,6 +354,6 @@ func RefreshToken(c *gin.Context) {
 		User:      user,
 		Token:     token,
 		ExpiresAt: claims.StandardClaims.ExpiresAt * 1000,
-	}, "登录成功", c)
+	}, "更新成功", c)
 
 }

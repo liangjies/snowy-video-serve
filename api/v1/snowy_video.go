@@ -21,24 +21,25 @@ import (
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
 // @Router /video/showVideos [post]
 func ShowVideos(c *gin.Context) {
-	page, err := strconv.Atoi(c.Query("page"))
-	if err != nil || page == 0 {
-		page = 1
+	var queryVideos request.QueryVideos
+	_ = c.ShouldBindJSON(&queryVideos)
+	fmt.Println(queryVideos)
+	if queryVideos.Page == 0 {
+		queryVideos.Page = 1
 	}
-	// 获取JSON数据
-	var videos model.Videos
-	_ = c.ShouldBindJSON(&videos)
+	if queryVideos.PageSize == 0 { // 每页分页的记录数
+		queryVideos.PageSize = 3
+	}
 
-	const PAGE_SIZE int = 6 // 每页分页的记录数
-	if err, list, total := service.QueryAllVideos(utils.GetUserID(c), videos, page, PAGE_SIZE); err != nil {
+	if err, list, total := service.QueryAllVideos(utils.GetUserID(c), queryVideos); err != nil {
 		global.SYS_LOG.Error("获取失败!", zap.Any("err", err))
 		response.FailWithMessage("获取失败", c)
 	} else {
 		response.OkWithDetailed(response.PageResult{
 			List:     list,
 			Total:    total,
-			Page:     page,
-			PageSize: PAGE_SIZE,
+			Page:     queryVideos.Page,
+			PageSize: queryVideos.PageSize,
 		}, "获取成功", c)
 	}
 }
@@ -48,24 +49,27 @@ func ShowVideos(c *gin.Context) {
 // @Produce  application/json
 // @Param file File
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
-// @Router /video/showVideos [post]
+// @Router /video/showAllVideos [post]
 func ShowAllVideos(c *gin.Context) {
-	page, err := strconv.Atoi(c.Query("page"))
-	if err != nil || page == 0 {
-		page = 1
+	var queryVideos request.QueryVideos
+	_ = c.ShouldBindJSON(&queryVideos)
+	fmt.Println(queryVideos)
+	if queryVideos.Page == 0 {
+		queryVideos.Page = 1
 	}
-	var videos model.Videos
+	if queryVideos.PageSize == 0 { // 每页分页的记录数
+		queryVideos.PageSize = 3
+	}
 
-	const PAGE_SIZE int = 3 // 每页分页的记录数
-	if err, list, total := service.QueryAllVideos(utils.GetUserID(c), videos, page, PAGE_SIZE); err != nil {
+	if err, list, total := service.QueryAllVideos(utils.GetUserID(c), queryVideos); err != nil {
 		global.SYS_LOG.Error("获取失败!", zap.Any("err", err))
 		response.FailWithMessage("获取失败", c)
 	} else {
 		response.OkWithDetailed(response.PageResult{
 			List:     list,
 			Total:    total,
-			Page:     page,
-			PageSize: PAGE_SIZE,
+			Page:     queryVideos.Page,
+			PageSize: queryVideos.PageSize,
 		}, "获取成功", c)
 	}
 }
