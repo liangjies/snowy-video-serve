@@ -2,12 +2,12 @@ package upload
 
 import (
 	"errors"
-	"snowy-video-serve/global"
-	"snowy-video-serve/utils"
 	"io"
 	"mime/multipart"
 	"os"
 	"path"
+	"snowy-video-serve/global"
+	"snowy-video-serve/utils"
 	"strings"
 	"time"
 
@@ -63,6 +63,12 @@ func (*Local) UploadFile(file *multipart.FileHeader) (string, string, error) {
 		return "", "", errors.New("function io.Copy() Filed, err:" + copyErr.Error())
 	}
 	return p, filename, nil
+}
+
+func (*Local) UploadLocalFile(filePath string, filename string, directory string) (string, string, error) {
+	var a, b string
+	var c error
+	return a, b, c
 }
 
 //@author: [piexlmax](https://github.com/piexlmax)

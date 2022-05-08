@@ -1,8 +1,8 @@
 package upload
 
 import (
-	"snowy-video-serve/global"
 	"mime/multipart"
+	"snowy-video-serve/global"
 )
 
 //@author: [ccfish86](https://github.com/ccfish86)
@@ -12,6 +12,7 @@ import (
 
 type OSS interface {
 	UploadFile(file *multipart.FileHeader) (string, string, error)
+	UploadLocalFile(filePath string, filename string, directory string) (string, string, error)
 	DeleteFile(key string) error
 }
 

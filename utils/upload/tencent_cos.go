@@ -3,11 +3,11 @@ package upload
 import (
 	"context"
 	"errors"
-	"snowy-video-serve/global"
 	"fmt"
 	"mime/multipart"
 	"net/http"
 	"net/url"
+	"snowy-video-serve/global"
 	"time"
 
 	"github.com/tencentyun/cos-go-sdk-v5"
@@ -32,6 +32,12 @@ func (*TencentCOS) UploadFile(file *multipart.FileHeader) (string, string, error
 		panic(err)
 	}
 	return global.SYS_CONFIG.TencentCOS.BaseURL + "/" + global.SYS_CONFIG.TencentCOS.PathPrefix + "/" + fileKey, fileKey, nil
+}
+
+func (*TencentCOS) UploadLocalFile(filePath string, filename string, directory string) (string, string, error) {
+	var a, b string
+	var c error
+	return a, b, c
 }
 
 // DeleteFile delete file form COS

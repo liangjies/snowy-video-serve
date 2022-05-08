@@ -35,11 +35,12 @@ func init() {
 	}
 }
 
-// const webUrl = "https://www.kuaishou.com/graphql"
-const webUrl = "http://3363389.xyz/kuaishou.json"
+const webUrl = "https://www.kuaishou.com/graphql"
+
+// const webUrl = "http://3363389.xyz/kuaishou.json"
 
 // const webUrl = "https://ll00.cn/Request/index.html"
-const filePath = "assets"
+const filePath = "assets/video"
 
 type MyJsonName struct {
 	OperationName string `json:"operationName"`
@@ -63,7 +64,7 @@ func Kuaishou() {
 
 	stut, _ := json.Marshal(&someOne)
 	reader := bytes.NewReader(stut)
-	req, _ := http.NewRequest("GET", webUrl, reader)
+	req, _ := http.NewRequest("POST", webUrl, reader)
 	// 自定义Header
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36 Edg/99.0.1150.46")
 	req.Header.Set("Cookie", "kpf=PC_WEB; kpn=KUAISHOU_VISION; clientid=3; did=web_c395d9594374446441a18de660161d34")
@@ -102,7 +103,8 @@ func Kuaishou() {
 	for i, _ := range feedsArray {
 		data := feeds.GetIndex(i)
 		title, _ := data.Get("photo").Get("caption").String()
-		photoUrl, _ := data.Get("photo").Get("photoH265Url").String()
+		// photoUrl, _ := data.Get("photo").Get("photoH265Url").String()
+		photoUrl, _ := data.Get("photo").Get("photoUrl").String()
 		// fmt.Println("title", title)
 		// fmt.Println("photoUrl", photoUrl)
 		err, id, videoPath, md5str := DownLoad(photoUrl)

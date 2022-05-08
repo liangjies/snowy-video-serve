@@ -16,6 +16,7 @@ require (
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/lestrrat-go/strftime v1.0.6 // indirect
 	github.com/qiniu/api.v7/v7 v7.8.2
+	github.com/qiniu/go-sdk/v7 v7.12.1
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/viper v1.11.0
 	github.com/swaggo/gin-swagger v1.4.2

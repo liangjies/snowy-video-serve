@@ -23,7 +23,7 @@ import (
 func ShowVideos(c *gin.Context) {
 	var queryVideos request.QueryVideos
 	_ = c.ShouldBindJSON(&queryVideos)
-	fmt.Println(queryVideos)
+
 	if queryVideos.Page == 0 {
 		queryVideos.Page = 1
 	}
@@ -53,7 +53,7 @@ func ShowVideos(c *gin.Context) {
 func ShowAllVideos(c *gin.Context) {
 	var queryVideos request.QueryVideos
 	_ = c.ShouldBindJSON(&queryVideos)
-	fmt.Println(queryVideos)
+
 	if queryVideos.Page == 0 {
 		queryVideos.Page = 1
 	}
