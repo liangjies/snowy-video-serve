@@ -21,6 +21,7 @@ type ShowVideoResponse struct {
 	CreateTime            time.Time `json:"createTime" gorm:"column:create_time"`
 	Avatar                string    `json:"avatar" gorm:"column:avatar;comment:用户昵称"`                  // 用户头像
 	NickName              string    `json:"nickname" gorm:"column:nickname;comment:用户昵称"`              // 用户昵称
+	IsLike                bool      `json:"islike" gorm:"column:islike"`                               // APP 是否喜欢
 	Isplay                bool      `json:"isplay" gorm:"column:isplay"`                               // APP
 	PlayIng               bool      `json:"playIng" gorm:"column:playIng"`                             // APP
 	State                 string    `json:"state" gorm:"column:state"`                                 // APP

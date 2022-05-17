@@ -18,12 +18,18 @@ import (
 func QueryAllVideos(id uint, queryVideos request.QueryVideos) (err error, list interface{}, total int64) {
 	limit := queryVideos.PageSize
 	offset := queryVideos.PageSize * (queryVideos.Page - 1)
-	db := global.SYS_DB.Model(&model.Videos{})
+	db := global.SYS_DB.Table("videos a")
 	var videoList []response.ShowVideoResponse
 
-	db = db.Select("videos.*, users_info.avatar, users_info.nickname,true as isplay, false as playIng,'pause' as state")
-	db = db.Joins("left join users_info on user_id = users_info.id").Joins("left join videos_history on videos_history.video_id = videos.id and videos_history.user_id= ? ", id)
-	db = db.Where("status = 1 AND nums is null")
+	db = db.Select("a.*,b.avatar,b.nickname,(d.id IS NOT NULL) AS islike,TRUE AS isplay,FALSE AS playIng,'pause' AS state")
+	db = db.Joins("LEFT JOIN users_info b ON a.user_id = b.id")
+	db = db.Joins("LEFT JOIN videos_history c ON c.video_id = a.id	AND c.user_id = ? ", id)
+	db = db.Joins("LEFT JOIN users_like_videos d ON d.video_id = a.id AND d.user_id = b.id")
+	db = db.Where("status = 1")
+
+	if queryVideos.VideoDesc == "" && queryVideos.UserID == 0 && queryVideos.VideoID == "" {
+		db = db.Where("c.nums is null")
+	}
 	// 搜索
 	if queryVideos.VideoDesc != "" {
 		db = db.Where("video_desc LIKE ?", "%"+queryVideos.VideoDesc+"%")
@@ -31,6 +37,7 @@ func QueryAllVideos(id uint, queryVideos request.QueryVideos) (err error, list i
 		if err = global.SYS_DB.Model(&model.SearchRecords{}).Create(&model.SearchRecords{Content: queryVideos.VideoDesc}).Error; err != nil {
 			return
 		}
+
 	}
 	// 搜索
 	if queryVideos.UserID != 0 {
@@ -38,7 +45,7 @@ func QueryAllVideos(id uint, queryVideos request.QueryVideos) (err error, list i
 	}
 	// 搜索
 	if queryVideos.VideoID != "" {
-		db = db.Where("videos.id = ?", queryVideos.VideoID)
+		db = db.Where("a.id = ?", queryVideos.VideoID)
 	}
 
 	err = db.Count(&total).Error
