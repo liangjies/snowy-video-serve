@@ -5,8 +5,8 @@
 
 #### 软件架构
 Gin、Gorm、MySQL、Redis、JWT、Zap、FFmpeg
-
 #### 项目演示
+[点击预览](http://video.icewx.com)(手机端)
 ##### 登录注册
 
 <center>
