@@ -1,8 +1,8 @@
 # snowy-video-serve
 
 #### 介绍
-短视频应用，具有视频播放，上下滑、评论、点赞功能
-
+短视频应用，前后端分离应用，具有视频播放，上下滑、评论、点赞功能
+前端代码：[https://github.com/liangjies/snowy-video-web](https://github.com/liangjies/snowy-video-web)
 #### 软件架构
 Gin、Gorm、MySQL、Redis、JWT、Zap、FFmpeg
 #### 项目演示
